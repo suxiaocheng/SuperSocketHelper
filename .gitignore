@@ -1,0 +1,15 @@
+# ignore output file
+*.csv
+*.txt
+
+# ignore backup file
+backup/
+*.swp
+*.backup
+*~
+
+# ignore generate file
+*.class
+
+# setting file
+.setting/
