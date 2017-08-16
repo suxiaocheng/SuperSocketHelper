@@ -1,10 +1,6 @@
 package Database;
 
-import java.awt.Cursor;
 import java.io.BufferedReader;
-import java.util.Calendar;
-
-import com.mysql.jdbc.log.Log;
 
 /**
  * Created by suxch on 2016/1/2.
@@ -20,20 +16,13 @@ public class ItemInfo extends SimplePropertyCollection {
         super(TEXT_DEFAULTS_ALL, reader, skipId, ROW_ID);
     }
     
-    public ItemInfo(int code, String name, double price_start, double price_last_end, 
+    public ItemInfo(String code, String name, double price_start, double price_last_end, 
     		double price_current, double price_today_high, double price_today_low, 
     		double price_compete_buy, double price_compete_seller, 
     		double price_num_deal, double price_deal, 
-    		double price_buy1, int num_buy1, 
-    		double price_buy2, int num_buy2, 
-    		double price_buy3, int num_buy3, 
-    		double price_buy4, int num_buy4, 
-    		double price_buy5, int num_buy5, 
-    		double price_seller1, int num_seller1, 
-    		double price_seller2, int num_seller2, 
-    		double price_seller3, int num_seller3, 
-    		double price_seller4, int num_seller4, 
-    		double price_seller5, int num_seller5){
+    		double[] price_buy, int[] num_buy,     		
+    		double[] price_seller, int[] num_seller,
+    		String date, String time){
     	super(TEXT_DEFAULTS_ALL);
     	set(ROW_ID, System.currentTimeMillis());
     	set(ROW_CODE, code);
@@ -47,26 +36,29 @@ public class ItemInfo extends SimplePropertyCollection {
     	set(ROW_PRICE_COMPETE_SELLER, price_compete_seller);
     	set(ROW_NUMBER_OF_DEAL, price_num_deal);
     	set(ROW_PRICE_OF_DEAL, price_deal);
-    	set(ROW_PRICE_BUY1, price_buy1);
-    	set(ROW_PRICE_BUY2, price_buy2);
-    	set(ROW_PRICE_BUY3, price_buy3);
-    	set(ROW_PRICE_BUY4, price_buy4);
-    	set(ROW_PRICE_BUY5, price_buy5);
-    	set(ROW_NUM_BUY1, num_buy1);
-    	set(ROW_NUM_BUY2, num_buy2);
-    	set(ROW_NUM_BUY3, num_buy3);
-    	set(ROW_NUM_BUY4, num_buy4);
-    	set(ROW_NUM_BUY5, num_buy5);
-    	set(ROW_PRICE_SELLER1, price_seller1);
-    	set(ROW_PRICE_SELLER2, price_seller2);
-    	set(ROW_PRICE_SELLER3, price_seller3);
-    	set(ROW_PRICE_SELLER4, price_seller4);
-    	set(ROW_PRICE_SELLER5, price_seller5);
-    	set(ROW_NUM_SELLER1, num_seller1);
-    	set(ROW_NUM_SELLER1, num_seller2);
-    	set(ROW_NUM_SELLER1, num_seller3);
-    	set(ROW_NUM_SELLER1, num_seller4);
-    	set(ROW_NUM_SELLER1, num_seller5);
+    	set(ROW_PRICE_BUY1, price_buy[0]);
+    	set(ROW_PRICE_BUY2, price_buy[1]);
+    	set(ROW_PRICE_BUY3, price_buy[2]);
+    	set(ROW_PRICE_BUY4, price_buy[3]);
+    	set(ROW_PRICE_BUY5, price_buy[4]);
+    	set(ROW_NUM_BUY1, num_buy[0]);
+    	set(ROW_NUM_BUY2, num_buy[1]);
+    	set(ROW_NUM_BUY3, num_buy[2]);
+    	set(ROW_NUM_BUY4, num_buy[3]);
+    	set(ROW_NUM_BUY5, num_buy[4]);
+    	set(ROW_PRICE_SELLER1, price_seller[0]);
+    	set(ROW_PRICE_SELLER2, price_seller[1]);
+    	set(ROW_PRICE_SELLER3, price_seller[2]);
+    	set(ROW_PRICE_SELLER4, price_seller[3]);
+    	set(ROW_PRICE_SELLER5, price_seller[4]);
+    	set(ROW_NUM_SELLER1, num_seller[0]);
+    	set(ROW_NUM_SELLER2, num_seller[1]);
+    	set(ROW_NUM_SELLER3, num_seller[2]);
+    	set(ROW_NUM_SELLER4, num_seller[3]);
+    	set(ROW_NUM_SELLER5, num_seller[4]);
+    	
+    	set(ROW_DATE, date);
+    	set(ROW_TIME, time);
     }
 
     /* Used for sql */
@@ -106,10 +98,33 @@ public class ItemInfo extends SimplePropertyCollection {
     public static final String ROW_NUM_SELLER3 = "NUM_SELLER3";
     public static final String ROW_NUM_SELLER4 = "NUM_SELLER4";
     public static final String ROW_NUM_SELLER5 = "NUM_SELLER5";
+    
+    public static final String ROW_DATE = "DATE";
+    public static final String ROW_TIME = "TIME";
+    
+    public static final String[] titleList = {ROW_ID, ROW_CODE, ROW_NAME, ROW_PRICE_START,
+			ROW_PRICE_LAST_END, ROW_PRICE_CURRENT, ROW_PRICE_TODAY_HIGH, 
+			ROW_PRICE_TODAY_LOW, ROW_PRICE_COMPETE_BUY, ROW_PRICE_COMPETE_SELLER,
+			ROW_NUMBER_OF_DEAL, ROW_PRICE_OF_DEAL, ROW_PRICE_BUY1, ROW_NUM_BUY1,
+			ROW_PRICE_BUY2, ROW_NUM_BUY2, ROW_PRICE_BUY3, ROW_NUM_BUY3,
+			ROW_PRICE_BUY4, ROW_NUM_BUY4, ROW_PRICE_BUY5, ROW_NUM_BUY5,
+			ROW_PRICE_SELLER1, ROW_NUM_SELLER1, ROW_PRICE_SELLER2, ROW_NUM_SELLER2, 
+			ROW_PRICE_SELLER3, ROW_NUM_SELLER3, ROW_PRICE_SELLER4, ROW_NUM_SELLER4, 
+			ROW_PRICE_SELLER5, ROW_NUM_SELLER5, ROW_DATE, ROW_TIME};
+    
+    public static final String[] compareList = {ROW_CODE, ROW_NAME, ROW_PRICE_START,
+			ROW_PRICE_LAST_END, ROW_PRICE_CURRENT, ROW_PRICE_TODAY_HIGH, 
+			ROW_PRICE_TODAY_LOW, ROW_PRICE_COMPETE_BUY, ROW_PRICE_COMPETE_SELLER,
+			ROW_NUMBER_OF_DEAL, ROW_PRICE_OF_DEAL, ROW_PRICE_BUY1, ROW_NUM_BUY1,
+			ROW_PRICE_BUY2, ROW_NUM_BUY2, ROW_PRICE_BUY3, ROW_NUM_BUY3,
+			ROW_PRICE_BUY4, ROW_NUM_BUY4, ROW_PRICE_BUY5, ROW_NUM_BUY5,
+			ROW_PRICE_SELLER1, ROW_NUM_SELLER1, ROW_PRICE_SELLER2, ROW_NUM_SELLER2, 
+			ROW_PRICE_SELLER3, ROW_NUM_SELLER3, ROW_PRICE_SELLER4, ROW_NUM_SELLER4, 
+			ROW_PRICE_SELLER5, ROW_NUM_SELLER5};
 
     public static final SimpleProperty[] TEXT_DEFAULTS_ALL = new SimpleProperty[]{
-            new SimpleProperty(ROW_ID, 0),
-            new SimpleProperty(ROW_CODE, 0),
+            new SimpleProperty(ROW_ID, 0.),
+            new SimpleProperty(ROW_CODE, ""),
             new SimpleProperty(ROW_NAME, ""),
             new SimpleProperty(ROW_PRICE_START, 0.),
             new SimpleProperty(ROW_PRICE_LAST_END, 0.),
@@ -143,62 +158,102 @@ public class ItemInfo extends SimplePropertyCollection {
             new SimpleProperty(ROW_NUM_SELLER2, 0),
             new SimpleProperty(ROW_NUM_SELLER3, 0),
             new SimpleProperty(ROW_NUM_SELLER4, 0),
-            new SimpleProperty(ROW_NUM_SELLER5, 0)            
+            new SimpleProperty(ROW_NUM_SELLER5, 0),
+            new SimpleProperty(ROW_DATE, ""),
+            new SimpleProperty(ROW_TIME, "")
     };
     
-    public static String dumpItemTitle() {
-        String str = "id, code, name, price start, "
-        		+ "price last day, price current, " 
-        		+ "price today high, price today low, price compete buy, " 
-        		+"price compete seller, number of deal, price of deal, "
-        		+ "price buy 1, num buy 1, price buy 2, num buy 2, "
-        		+ "price buy 3, num buy 3, price buy 4, num buy 4, "
-        		+ "price buy 5, num buy 5, price seller 1, num seller 1, "
-        		+ "price seller 2, num seller 2, price seller 3, num seller 3, "
-        		+ "price seller 4, num seller 4, price seller 5, num seller 5";
-        
-        return str;
+    public String getValue() {
+    	String str;
+    	boolean appendColon = false;
+    	
+    	str = "(";
+    	
+    	for(String s: titleList){
+    		if(appendColon == true){
+    			str += ",";
+    		}
+    		
+    		switch(get(s).getType()){
+    		case SimpleProperty.TYPE_BOOL:
+    			str += get(s).getBool();
+    			break;
+    		case SimpleProperty.TYPE_DOUBLE:
+    			str += get(s).getDouble();
+    			break;
+    		case SimpleProperty.TYPE_INT:
+    			str += get(s).getInt();
+    			break;
+    		case SimpleProperty.TYPE_TEXT:
+    			str += "\"" + get(s).getString() + "\"";
+    			break;
+    		}
+    		
+    		appendColon = true;
+    	}
+    	str += ")";
+    	
+    	return str;
     }
-
-    public static String dumpItemInfo(ItemInfo info) {
-        String str;
-        
-        str = new String();
-        str += info.get(ROW_ID) + ",";
-        str += info.get(ROW_CODE) + ",";
-        str += info.get(ROW_NAME) + ",";
-        str += info.get(ROW_PRICE_START) + ",";
-        str += info.get(ROW_PRICE_LAST_END) + ",";
-        str += info.get(ROW_PRICE_CURRENT) + ",";
-        str += info.get(ROW_PRICE_TODAY_HIGH) + ",";
-        str += info.get(ROW_PRICE_TODAY_LOW) + ",";
-        str += info.get(ROW_PRICE_COMPETE_BUY) + ",";
-        str += info.get(ROW_PRICE_COMPETE_SELLER) + ",";
-        str += info.get(ROW_NUMBER_OF_DEAL) + ",";
-        str += info.get(ROW_PRICE_OF_DEAL) + ",";
-        
-        str += info.get(ROW_PRICE_BUY1) + ",";
-        str += info.get(ROW_NUM_BUY1) + ",";
-        str += info.get(ROW_PRICE_BUY2) + ",";
-        str += info.get(ROW_NUM_BUY2) + ",";
-        str += info.get(ROW_PRICE_BUY3) + ",";
-        str += info.get(ROW_NUM_BUY3) + ",";
-        str += info.get(ROW_PRICE_BUY4) + ",";
-        str += info.get(ROW_NUM_BUY4) + ",";
-        str += info.get(ROW_PRICE_BUY5) + ",";
-        str += info.get(ROW_NUM_BUY5) + ",";
-        
-        str += info.get(ROW_PRICE_SELLER1) + ",";
-        str += info.get(ROW_NUM_SELLER1) + ",";
-        str += info.get(ROW_PRICE_SELLER2) + ",";
-        str += info.get(ROW_NUM_SELLER2) + ",";
-        str += info.get(ROW_PRICE_SELLER3) + ",";
-        str += info.get(ROW_NUM_SELLER3) + ",";
-        str += info.get(ROW_PRICE_SELLER4) + ",";
-        str += info.get(ROW_NUM_SELLER4) + ",";
-        str += info.get(ROW_PRICE_SELLER5) + ",";
-        str += info.get(ROW_NUM_SELLER5);
-        
-        return str;
+    
+    public String getCompareList() {
+    	String str;
+    	boolean appendColon = false;
+    	
+    	str = "(";
+    	
+    	for(String s: compareList){
+    		if(appendColon == true){
+    			str += ",";
+    		}
+    		
+    		switch(get(s).getType()){
+    		case SimpleProperty.TYPE_BOOL:
+    			str += get(s).getBool();
+    			break;
+    		case SimpleProperty.TYPE_DOUBLE:
+    			str += get(s).getDouble();
+    			break;
+    		case SimpleProperty.TYPE_INT:
+    			str += get(s).getInt();
+    			break;
+    		case SimpleProperty.TYPE_TEXT:
+    			str += "\"" + get(s).getString() + "\"";
+    			break;
+    		}
+    		
+    		appendColon = true;
+    	}
+    	str += ")";
+    	
+    	return str;
+    }
+    
+    public String getTitle(){
+    	String str;
+    	boolean appendColon = false;
+    	
+    	str = "(";
+    	
+    	for(String s: titleList){
+    		if(appendColon == true){
+    			str += ",";
+    		}
+    		str += s;
+    		appendColon = true;
+    	}
+    	str += ")";
+    	
+    	return str;
+    }
+    
+    public boolean compareItem(ItemInfo diff){
+    	boolean status = false;
+    	String str1 = diff.getCompareList();
+    	String str2 = getCompareList();
+    	if(str1.compareTo(str2) == 0){
+    		status = true;
+    	}
+    	return status;
     }
 }

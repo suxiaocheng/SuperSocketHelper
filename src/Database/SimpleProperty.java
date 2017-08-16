@@ -30,7 +30,7 @@ public class SimpleProperty {
 
 	public SimpleProperty(String key, Double val) {
 		mKey = key;
-		mType = TYPE_TEXT;
+		mType = TYPE_DOUBLE;
 		mValue = new Double(val);
 	}
 

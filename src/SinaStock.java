@@ -31,6 +31,8 @@ public class SinaStock {
 	private static List<String> codes = new ArrayList<String>();
 	private static File stockDetailFile = null;
 	private static File stockSuspendedFile = null;
+	
+	private Database stock_db;
 
 	/**
 	 * Check if the stock string is valid;
@@ -404,7 +406,34 @@ public class SinaStock {
 				}
 			}
 		}
+		
+		codes.clear();
+		codes.add("sz300041");
+		codes.add("sz002434");
+		codes.add("sz300221");
+		
+		Database db = new Database("stock");
+		List<Thread> listThread = new ArrayList<>();
+		
+		for (String code : codes) {
+			Thread t = new Thread(new UpdateSocketThread(db, code));
+			t.start();
+			listThread.add(t);			
+		}
 
+		for (Thread tmp : listThread) {
+			try {
+				tmp.join();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				System.out.println("[Info] Get stock information interrupt");
+			}
+		}
+		
+		db.closeDatabase();
+		
+		/*
 		t1 = System.currentTimeMillis() - t1;
 		System.out.println("[Info] Update database execute (" + t1 / 1000 + "." + t1 % 1000 + "s) sucessfully");
 
@@ -417,5 +446,6 @@ public class SinaStock {
 			e.printStackTrace();
 			System.out.println("[Info] Program execute fail");
 		}
+		*/
 	}
 }
