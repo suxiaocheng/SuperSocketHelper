@@ -12,9 +12,11 @@ public class UpdateSocketThread implements Runnable {
 	private static final String TAG = "UpdateSocketThread";
 	private static final int CONNECTION_TIMEOUT = 30000;
 	private static final boolean DEBUG = false;
+	private static boolean bNeedQuit = false;
 	Database db;
 	String stock;
-	int count = 10000;
+	int count = 0;
+	int updateCount=0;
 
 	UpdateSocketThread(Database _db, String _stock) {
 		super();
@@ -71,12 +73,11 @@ public class UpdateSocketThread implements Runnable {
 		String date, time;
 
 		db.createTable(stock);
-
-		while (count>0) {
+		while (true) {
 			if((count % 100) == 0){
-				System.out.println("Thread " + stock);
+				System.out.println("Thread " + stock + " " + count);
 			}
-			count--;
+			count++;
 			try {
 				listTmp = getStockInfoByCode(stock);
 
@@ -116,13 +117,31 @@ public class UpdateSocketThread implements Runnable {
 				if (needAddToDb) {
 					sql = "INSERT INTO " + stock + " " + item.getTitle() + "VALUES " + item.getValue() + ";";
 					db.insertTable(sql);
+					updateCount++;
+				}
+				
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 				System.out.println("[Error]Execute " + stock);
+			} catch(IndexOutOfBoundsException e){
+				e.printStackTrace();
+				System.out.println("Out of bound");
+				break;
+			}
+			if(bNeedQuit == true){
+				System.out.println("User quit");
+				break;
 			}
 		}
+		System.out.println("Execute " + stock + " count: " + count + 
+				", Times: " + updateCount);
 	}
 }

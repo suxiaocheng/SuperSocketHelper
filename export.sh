@@ -1,0 +1,1 @@
+@ sqlite3  -csv -header test.db  "select * from tt" > stat.csv

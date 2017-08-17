@@ -408,9 +408,17 @@ public class SinaStock {
 		}
 		
 		codes.clear();
-		codes.add("sz300041");
-		codes.add("sz002434");
-		codes.add("sz300221");
+		codes.add("sh601318");
+		codes.add("sz000826");
+		codes.add("sz002415");
+		codes.add("sh600036");
+		codes.add("sz002271");
+		codes.add("sz000333");
+		codes.add("sh601717");
+		codes.add("sh601169");
+		codes.add("sz300408");
+		codes.add("sz300003");
+		codes.add("sz300458");
 		
 		Database db = new Database("stock");
 		List<Thread> listThread = new ArrayList<>();
