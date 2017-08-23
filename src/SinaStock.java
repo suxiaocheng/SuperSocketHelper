@@ -8,8 +8,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -31,7 +33,7 @@ public class SinaStock {
 	private static List<String> codes = new ArrayList<String>();
 	private static File stockDetailFile = null;
 	private static File stockSuspendedFile = null;
-	
+
 	private Database stock_db;
 
 	/**
@@ -383,6 +385,7 @@ public class SinaStock {
 	public static void main(String[] args) {
 		long t1 = System.currentTimeMillis();
 		File in = new File(db);
+		Calendar start_calendar = Calendar.getInstance();
 		if (DEBUG_ALWAYS_CREATE_DB) {
 			if (in.exists()) {
 				in.delete();
@@ -406,7 +409,7 @@ public class SinaStock {
 				}
 			}
 		}
-		
+
 		codes.clear();
 		codes.add("sh601318");
 		codes.add("sz000826");
@@ -419,41 +422,56 @@ public class SinaStock {
 		codes.add("sz300408");
 		codes.add("sz300003");
 		codes.add("sz300458");
-		
-		Database db = new Database("stock");
-		List<Thread> listThread = new ArrayList<>();
-		
-		for (String code : codes) {
-			Thread t = new Thread(new UpdateSocketThread(db, code));
-			t.start();
-			listThread.add(t);			
-		}
 
-		for (Thread tmp : listThread) {
-			try {
-				tmp.join();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				System.out.println("[Info] Get stock information interrupt");
+		while (true) {
+			UpdateSocketThread.bNeedQuit = false;
+			start_calendar = Calendar.getInstance();
+			Database db = new Database("stock");
+			List<Thread> listThread = new ArrayList<>();
+
+			for (String code : codes) {
+				Thread t = new Thread(new UpdateSocketThread(db, code));
+				t.start();
+				listThread.add(t);
+			}
+			
+			Thread t = new Thread(new WatchThread());
+			t.start();
+			listThread.add(t);
+
+			/* Check for the time */
+			while (true) {
+				Calendar cur_calendar = Calendar.getInstance();
+				if ((cur_calendar.get(Calendar.DAY_OF_MONTH) != 
+						start_calendar.get(Calendar.DAY_OF_MONTH)) ||
+						(WatchThread.bNeedQuit == true)) {
+					UpdateSocketThread.bNeedQuit = true;
+					break;
+				}
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}				
+			}
+
+			for (Thread tmp : listThread) {
+				try {
+					tmp.join();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					System.out.println("[Info] Get stock information interrupt");
+				}
+			}
+
+			db.closeDatabase();
+			
+			if(WatchThread.bNeedQuit == true){
+				System.out.println("[Info] User quit finally");
+				break;
 			}
 		}
-		
-		db.closeDatabase();
-		
-		/*
-		t1 = System.currentTimeMillis() - t1;
-		System.out.println("[Info] Update database execute (" + t1 / 1000 + "." + t1 % 1000 + "s) sucessfully");
-
-		try {
-			t1 = System.currentTimeMillis();
-			getAllStockInfo();
-			t1 = System.currentTimeMillis() - t1;
-			System.out.println("[Info] Update data execute (" + t1 / 1000 + "." + t1 % 1000 + "s) sucessfully");
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.out.println("[Info] Program execute fail");
-		}
-		*/
 	}
 }

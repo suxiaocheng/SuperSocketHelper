@@ -12,7 +12,7 @@ public class UpdateSocketThread implements Runnable {
 	private static final String TAG = "UpdateSocketThread";
 	private static final int CONNECTION_TIMEOUT = 30000;
 	private static final boolean DEBUG = false;
-	private static boolean bNeedQuit = false;
+	public static boolean bNeedQuit = false;
 	Database db;
 	String stock;
 	int count = 0;
