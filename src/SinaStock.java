@@ -383,32 +383,32 @@ public class SinaStock {
 	}
 
 	public static void main(String[] args) {
-		long t1 = System.currentTimeMillis();
-		File in = new File(db);
 		Calendar start_calendar = Calendar.getInstance();
-		if (DEBUG_ALWAYS_CREATE_DB) {
-			if (in.exists()) {
-				in.delete();
-			}
-		}
-		if (!in.exists()) {
-			// 从网络获取
-			if (codes.size() < 1)
-				try {
-					codes = getAllStackCodes();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-		} else {
-			// 从本地获取
-			if (codes.size() < 1) {
-				try {
-					codes = getAllStockCodesFromLocal();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
+//		long t1 = System.currentTimeMillis();
+//		File in = new File(db);		
+//		if (DEBUG_ALWAYS_CREATE_DB) {
+//			if (in.exists()) {
+//				in.delete();
+//			}
+//		}
+//		if (!in.exists()) {
+//			// 从网络获取
+//			if (codes.size() < 1)
+//				try {
+//					codes = getAllStackCodes();
+//				} catch (IOException e) {
+//					e.printStackTrace();
+//				}
+//		} else {
+//			// 从本地获取
+//			if (codes.size() < 1) {
+//				try {
+//					codes = getAllStockCodesFromLocal();
+//				} catch (IOException e) {
+//					e.printStackTrace();
+//				}
+//			}
+//		}
 
 		codes.clear();
 		codes.add("sh601318");
