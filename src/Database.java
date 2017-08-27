@@ -11,6 +11,7 @@ import Database.SimplePropertyCollection;
 
 public class Database {
 	private String databaseName;
+	public String subName;
 	private Connection conn = null;
 
 	public Database(String name) {
@@ -18,6 +19,7 @@ public class Database {
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd");
 		String dateString = formatter.format(currentTime);
 
+		subName = name + dateString + ".db";
 		databaseName = "jdbc:sqlite:" + name + dateString + ".db";
 		try {
 			Class.forName("org.sqlite.JDBC");

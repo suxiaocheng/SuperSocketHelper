@@ -383,9 +383,11 @@ public class SinaStock {
 	}
 
 	public static void main(String[] args) {
-		long t1 = System.currentTimeMillis();
-		File in = new File(db);
 		Calendar start_calendar = Calendar.getInstance();
+		Thread sendMailThread;
+		/*
+		long t1 = System.currentTimeMillis();
+		File in = new File(db);		
 		if (DEBUG_ALWAYS_CREATE_DB) {
 			if (in.exists()) {
 				in.delete();
@@ -409,6 +411,7 @@ public class SinaStock {
 				}
 			}
 		}
+		*/
 
 		codes.clear();
 		codes.add("sh601318");
@@ -467,6 +470,15 @@ public class SinaStock {
 			}
 
 			db.closeDatabase();
+			
+			sendMailThread = new Thread(new SendEmail(db.subName, db.subName));
+			try {
+				sendMailThread.join();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				System.out.println("[Info] Sending mail get an interrupt");
+			}
 			
 			if(WatchThread.bNeedQuit == true){
 				System.out.println("[Info] User quit finally");
