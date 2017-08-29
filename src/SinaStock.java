@@ -385,6 +385,7 @@ public class SinaStock {
 	public static void main(String[] args) {
 		Calendar start_calendar = Calendar.getInstance();
 		Thread sendMailThread;
+		Thread watchThread;
 //		long t1 = System.currentTimeMillis();
 //		File in = new File(db);		
 //		if (DEBUG_ALWAYS_CREATE_DB) {
@@ -423,6 +424,9 @@ public class SinaStock {
 		codes.add("sz300408");
 		codes.add("sz300003");
 		codes.add("sz300458");
+		
+		watchThread = new Thread(new WatchThread());
+		watchThread.start();
 
 		while (true) {
 			UpdateSocketThread.bNeedQuit = false;
@@ -434,11 +438,7 @@ public class SinaStock {
 				Thread t = new Thread(new UpdateSocketThread(db, code));
 				t.start();
 				listThread.add(t);
-			}
-			
-			Thread t = new Thread(new WatchThread());
-			t.start();
-			listThread.add(t);
+			}			
 
 			/* Check for the time */
 			while (true) {
