@@ -470,6 +470,7 @@ public class SinaStock {
 			db.closeDatabase();
 			
 			sendMailThread = new Thread(new SendEmail(db.subName, db.subName));
+			sendMailThread.start();
 			try {
 				sendMailThread.join();
 			} catch (InterruptedException e) {
