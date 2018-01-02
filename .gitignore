@@ -14,3 +14,10 @@ backup/
 
 # setting file
 .setting/
+
+# ignore output dir
+output/
+bin/
+
+# ignore compress file
+*.xz
