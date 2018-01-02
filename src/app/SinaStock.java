@@ -59,7 +59,6 @@ public class SinaStock {
 		return bRet;
 	}
 
-	// 解析一组股票代码字符串 把code中包括的所有股票代码放入List中
 	private static List<String> handleStockCode(String code) {
 		List<String> outputList = null;
 		int end = code.indexOf(";");
@@ -81,7 +80,7 @@ public class SinaStock {
 	}
 
 	/**
-	 * 返回的值是一个js代码段 包括指定url页面包含的所有股票代码
+	 * 
 	 * 
 	 * @param url
 	 *            URL need to handle;
@@ -182,7 +181,6 @@ public class SinaStock {
 	}
 
 	private static void saveStockCodes(List<String> codes) throws IOException {
-		// 将所有股票代码存入文件中
 		File out = new File(db);
 		if (!out.exists())
 			out.createNewFile();
@@ -384,31 +382,31 @@ public class SinaStock {
 		Calendar start_calendar = Calendar.getInstance();
 		Thread sendMailThread;
 		Thread watchThread;
-		// long t1 = System.currentTimeMillis();
-		// File in = new File(db);
-		// if (DEBUG_ALWAYS_CREATE_DB) {
-		// if (in.exists()) {
-		// in.delete();
-		// }
-		// }
-		// if (!in.exists()) {
-		// // 从网络获取
-		// if (codes.size() < 1)
-		// try {
-		// codes = getAllStackCodes();
-		// } catch (IOException e) {
-		// e.printStackTrace();
-		// }
-		// } else {
-		// // 从本地获取
-		// if (codes.size() < 1) {
-		// try {
-		// codes = getAllStockCodesFromLocal();
-		// } catch (IOException e) {
-		// e.printStackTrace();
-		// }
-		// }
-		// }
+		long t1 = System.currentTimeMillis();
+		File in = new File(db);
+		if (DEBUG_ALWAYS_CREATE_DB) {
+			if (in.exists()) {
+				in.delete();
+			}
+		}
+		if (!in.exists()) {
+			if (codes.size() < 1)
+				try {
+					codes = getAllStackCodes();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+		} else {
+			if (codes.size() < 1) {
+				try {
+					codes = getAllStockCodesFromLocal();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		Log.d("Get code execute " + (System.currentTimeMillis()- t1) + " s");
 
 		codes.clear();
 		codes.add("sh601318");

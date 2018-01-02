@@ -1,4 +1,5 @@
 package app;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -19,7 +20,7 @@ public class UpdateSocketThread implements Runnable {
 	Database db;
 	String stock;
 	int count = 0;
-	int updateCount=0;
+	int updateCount = 0;
 
 	UpdateSocketThread(Database _db, String _stock) {
 		super();
@@ -27,12 +28,14 @@ public class UpdateSocketThread implements Runnable {
 		stock = _stock;
 	}
 
-	public static List<String> getStockInfoByCode(String stockCode) throws IOException {
+	public static List<String> getStockInfoByCode(String stockCode)
+			throws IOException {
 		List<String> stockList = new ArrayList<String>();
 		URL url = new URL("http://hq.sinajs.cn/?list=" + stockCode);
 		URLConnection connection = url.openConnection();
 		connection.setConnectTimeout(CONNECTION_TIMEOUT);
-		BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+		BufferedReader br = new BufferedReader(new InputStreamReader(
+				connection.getInputStream()));
 		String line = null;
 		StringBuffer sb = new StringBuffer();
 		while ((line = br.readLine()) != null) {
@@ -77,7 +80,7 @@ public class UpdateSocketThread implements Runnable {
 
 		db.createTable(stock);
 		while (true) {
-			if((count % 100) == 0){
+			if ((count % 100) == 0) {
 				Log.d("Thread " + stock + " " + count);
 			}
 			count++;
@@ -108,9 +111,11 @@ public class UpdateSocketThread implements Runnable {
 				date = listTmp.get(30);
 				time = listTmp.get(31);
 
-				item = new ItemInfo(code, name, price_start, price_last_end, price_current, price_today_high,
-						price_today_low, price_compete_buy, price_compete_seller, price_num_deal, price_deal, price_buy,
-						num_buy, price_seller, num_seller, date, time);
+				item = new ItemInfo(code, name, price_start, price_last_end,
+						price_current, price_today_high, price_today_low,
+						price_compete_buy, price_compete_seller,
+						price_num_deal, price_deal, price_buy, num_buy,
+						price_seller, num_seller, date, time);
 
 				needAddToDb = true;
 				if ((oldItem != null) && item.compareItem(oldItem)) {
@@ -118,11 +123,12 @@ public class UpdateSocketThread implements Runnable {
 				}
 				oldItem = item;
 				if (needAddToDb) {
-					sql = "INSERT INTO " + stock + " " + item.getTitle() + "VALUES " + item.getValue() + ";";
+					sql = "INSERT INTO " + stock + " " + item.getTitle()
+							+ "VALUES " + item.getValue() + ";";
 					db.insertTable(sql);
 					updateCount++;
 				}
-				
+
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
@@ -134,17 +140,17 @@ public class UpdateSocketThread implements Runnable {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 				Log.e("[Error]Execute " + stock);
-			} catch(IndexOutOfBoundsException e){
+			} catch (IndexOutOfBoundsException e) {
 				e.printStackTrace();
 				Log.e("Out of bound");
 				break;
 			}
-			if(bNeedQuit == true){
+			if (bNeedQuit == true) {
 				Log.d("User quit");
 				break;
 			}
 		}
-		Log.d("Execute " + stock + " count: " + count + 
-				", Times: " + updateCount);
+		Log.d("Execute " + stock + " count: " + count + ", Times: "
+				+ updateCount);
 	}
 }
