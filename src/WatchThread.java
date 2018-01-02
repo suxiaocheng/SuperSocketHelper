@@ -1,5 +1,7 @@
 import java.util.Scanner;
 
+import debug.Log;
+
 public class WatchThread  implements Runnable {
 	public static boolean bNeedQuit = false;
 	
@@ -13,13 +15,13 @@ public class WatchThread  implements Runnable {
 		String str;
 		while(true){
 			str = sc.nextLine();
-			System.out.println("Your input is: " + str);
+			Log.d("Your input is: " + str);
 			if(str.compareToIgnoreCase("quit") == 0){
 				bNeedQuit = true;
 				break;
 			}
 		}
 		sc = null;
-		System.out.println("Watch thread is quit");
+		Log.d("Watch thread is quit");
 	}
 }

@@ -6,7 +6,8 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
-import Database.ItemInfo;
+import database.ItemInfo;
+import debug.Log;
 
 public class UpdateSocketThread implements Runnable {
 	private static final String TAG = "UpdateSocketThread";
@@ -75,7 +76,7 @@ public class UpdateSocketThread implements Runnable {
 		db.createTable(stock);
 		while (true) {
 			if((count % 100) == 0){
-				System.out.println("Thread " + stock + " " + count);
+				Log.d("Thread " + stock + " " + count);
 			}
 			count++;
 			try {
@@ -130,18 +131,18 @@ public class UpdateSocketThread implements Runnable {
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-				System.out.println("[Error]Execute " + stock);
+				Log.e("[Error]Execute " + stock);
 			} catch(IndexOutOfBoundsException e){
 				e.printStackTrace();
-				System.out.println("Out of bound");
+				Log.e("Out of bound");
 				break;
 			}
 			if(bNeedQuit == true){
-				System.out.println("User quit");
+				Log.d("User quit");
 				break;
 			}
 		}
-		System.out.println("Execute " + stock + " count: " + count + 
+		Log.d("Execute " + stock + " count: " + count + 
 				", Times: " + updateCount);
 	}
 }

@@ -1,4 +1,3 @@
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -8,11 +7,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
-import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
+
+import debug.Log;
 
 /**
  * 
@@ -24,7 +24,6 @@ import java.util.List;
 public class SinaStock {
 	private static String db = ".\\sina-stock-codes.txt";
 	private static final boolean DEBUG_ALWAYS_CREATE_DB = false;
-	private static final boolean DEBUG_DATA_SAVE2CSV = true;
 	private static final int CONNECTION_TIMEOUT = 30000;
 	private static final int CONNECTION_PARALLEL_EXEC = 64;
 
@@ -47,7 +46,8 @@ public class SinaStock {
 		boolean bRet = false;
 
 		for (int i = 0; i < s.length(); i++) {
-			if (Character.isDigit(s.charAt(i)) || Character.isAlphabetic(s.charAt(i))) {
+			if (Character.isDigit(s.charAt(i))
+					|| Character.isAlphabetic(s.charAt(i))) {
 				bRet = true;
 				break;
 			}
@@ -88,7 +88,8 @@ public class SinaStock {
 	private static String getBatchStackCodes(URL url) throws IOException {
 		URLConnection connection = url.openConnection();
 		connection.setConnectTimeout(CONNECTION_TIMEOUT);
-		BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+		BufferedReader br = new BufferedReader(new InputStreamReader(
+				connection.getInputStream()));
 		String line = null;
 		StringBuffer sb = new StringBuffer();
 		boolean flag = false;
@@ -100,7 +101,8 @@ public class SinaStock {
 			if (line.contains("</script>")) {
 				flag = false;
 				if (sb.length() > 0) {
-					if (sb.toString().contains("code_list") && sb.toString().contains("element_list")) {
+					if (sb.toString().contains("code_list")
+							&& sb.toString().contains("element_list")) {
 						break;
 					} else {
 						sb.setLength(0);
@@ -129,17 +131,18 @@ public class SinaStock {
 			String code = new String();
 			List<String> listTmp;
 			try {
-				System.out.println("[Info]Execute " + count + ", URL: " + assessURL.toString());
+				Log.d("[Info]Execute " + count + ", URL: "
+						+ assessURL.toString());
 				code = getBatchStackCodes(assessURL);
 				listTmp = handleStockCode(code);
 				synchronized (codes) {
 					codes.addAll(listTmp);
 				}
-				System.out.println("[Info]Execute " + count + " over.");
+				Log.d("[Info]Execute " + count + " over.");
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-				System.out.println("[Error]Execute " + count);
+				Log.e("[Error]Execute " + count);
 			}
 		}
 	}
@@ -150,7 +153,9 @@ public class SinaStock {
 		int i;
 		URL url = null;
 		for (i = 1; i < 45; i++) {
-			url = new URL("http://vip.stock.finance.sina.com.cn/q/go.php/vIR_CustomSearch/index.phtml?p=" + i);
+			url = new URL(
+					"http://vip.stock.finance.sina.com.cn/q/go.php/vIR_CustomSearch/index.phtml?p="
+							+ i);
 			updateDataThread = new Thread(new GetURLInfoThread(url, i));
 			// updateDataThread.run();
 			updateDataThread.start();
@@ -162,7 +167,7 @@ public class SinaStock {
 			try {
 				// 等待所有线程执行完毕
 				iThread.join();
-				// System.out.println("Thread" + iThread.count + " is finish");
+				// Log.d("Thread" + iThread.count + " is finish");
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -198,7 +203,7 @@ public class SinaStock {
 		String line = null;
 		while ((line = br.readLine()) != null) {
 			if (checkStockStringValid(line) == false) {
-				System.out.println("[Warning]Invalid stock string: " + line + "\n");
+				Log.e("[Warning]Invalid stock string: " + line + "\n");
 			} else {
 				codes.add(line);
 			}
@@ -210,13 +215,15 @@ public class SinaStock {
 		return codes;
 	}
 
-	public static List<String> getStockInfoByCode(String stockCode) throws IOException {
+	public static List<String> getStockInfoByCode(String stockCode)
+			throws IOException {
 		// 仅仅打印
 		List<String> stockList = new ArrayList<String>();
 		URL url = new URL("http://hq.sinajs.cn/?list=" + stockCode);
 		URLConnection connection = url.openConnection();
 		connection.setConnectTimeout(CONNECTION_TIMEOUT);
-		BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+		BufferedReader br = new BufferedReader(new InputStreamReader(
+				connection.getInputStream()));
 		String line = null;
 		StringBuffer sb = new StringBuffer();
 		while ((line = br.readLine()) != null) {
@@ -227,14 +234,9 @@ public class SinaStock {
 			rs = rs.substring(rs.indexOf("\"") + 1, rs.lastIndexOf("\""));
 			String[] rss = rs.split(",");
 			for (int i = 0; i < rss.length; i++) {
-				if (!DEBUG_DATA_SAVE2CSV) {
-					System.out.print(rss[i] + "\t|");
-				}
+				System.out.print(rss[i] + "\t|");
 				stockList.add(rss[i]);
 			}
-			// if (!DEBUG_DATA_SAVE2CSV) {
-			// System.out.println("\n------------------------------------");
-			// }
 		}
 		return stockList;
 	}
@@ -263,7 +265,7 @@ public class SinaStock {
 			}
 			try {
 				if (list.get(0).contains("FAILED")) {
-					System.out.println("[Warning] " + stockCode + " get fail");
+					Log.e("[Warning] " + stockCode + " get fail");
 				} else {
 					synchronized (codes) {
 						bwHandle.write(stockCode);
@@ -288,7 +290,7 @@ public class SinaStock {
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-				System.out.println("[Error] Write stock information");
+				Log.e("[Error] Write stock information");
 			}
 		}
 	}
@@ -299,82 +301,75 @@ public class SinaStock {
 		List<Thread> listThread = new ArrayList<Thread>();
 		int count;
 		boolean needQuit = false;
-		if (DEBUG_DATA_SAVE2CSV) {
-			stockDetailFile = new File(StockDetailFile);
-			stockSuspendedFile = new File(StockSuspendedFile);
-			boolean padding = false;
-			BufferedWriter bwDetail = new BufferedWriter(new FileWriter(stockDetailFile));
-			BufferedWriter bwSuspended = new BufferedWriter(new FileWriter(StockSuspendedFile));
-			for (String h : header) {
-				if (padding) {
-					bwDetail.write(',');
-				} else {
-					padding = true;
-				}
-				bwDetail.write(h);
+		stockDetailFile = new File(StockDetailFile);
+		stockSuspendedFile = new File(StockSuspendedFile);
+		boolean padding = false;
+		BufferedWriter bwDetail = new BufferedWriter(new FileWriter(
+				stockDetailFile));
+		BufferedWriter bwSuspended = new BufferedWriter(new FileWriter(
+				StockSuspendedFile));
+		for (String h : header) {
+			if (padding) {
+				bwDetail.write(',');
+			} else {
+				padding = true;
 			}
-			bwDetail.newLine();
+			bwDetail.write(h);
+		}
+		bwDetail.newLine();
 
-			count = 0;
-			for (String code : codes) {
-				t = new Thread(new GetItemInfoThread(code, bwDetail, bwSuspended));
-				t.start();
-				listThread.add(t);
+		count = 0;
+		for (String code : codes) {
+			t = new Thread(new GetItemInfoThread(code, bwDetail, bwSuspended));
+			t.start();
+			listThread.add(t);
 
-				count++;
-				if ((count % CONNECTION_PARALLEL_EXEC) == 0) {
-					System.out.println(
-							"[Info] Process [" + (count - CONNECTION_PARALLEL_EXEC) + "~" + count + "] cluster");
-					for (Thread tmp : listThread) {
-						try {
-							tmp.join();
-						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-							System.out.println("[Info] Get stock information interrupt");
-							needQuit = true;
-						}
-					}
-					System.out.println("[Info] Process end");
-					listThread.clear();
-					if (needQuit) {
-						break;
+			count++;
+			if ((count % CONNECTION_PARALLEL_EXEC) == 0) {
+				Log.d("[Info] Process [" + (count - CONNECTION_PARALLEL_EXEC)
+						+ "~" + count + "] cluster");
+				for (Thread tmp : listThread) {
+					try {
+						tmp.join();
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						Log.e("[Info] Get stock information interrupt");
+						needQuit = true;
 					}
 				}
-			}
-
-			for (Thread tmp : listThread) {
-				try {
-					tmp.join();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					System.out.println("[Info] Get stock information interrupt");
+				Log.d("[Info] Process end");
+				listThread.clear();
+				if (needQuit) {
+					break;
 				}
-			}
-
-			bwSuspended.flush();
-			bwSuspended.close();
-			bwSuspended = null;
-
-			bwDetail.flush();
-			bwDetail.close();
-			bwDetail = null;
-		} else {
-			System.out.println(header.length);
-			for (int i = 0; i < header.length; i++) {
-				System.out.print(header[i] + "\t|");
-			}
-			for (String code : codes) {
-				getStockInfoByCode(code);
 			}
 		}
+
+		for (Thread tmp : listThread) {
+			try {
+				tmp.join();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				Log.e("[Info] Get stock information interrupt");
+			}
+		}
+
+		bwSuspended.flush();
+		bwSuspended.close();
+		bwSuspended = null;
+
+		bwDetail.flush();
+		bwDetail.close();
+		bwDetail = null;
 	}
 
 	public static String[] getHeaders() {
-		String[] header = { "股票代码", "股票名字", "今日开盘价	", "昨日收盘价", "当前价格", "今日最高价", "今日最低价", "竟买价", "竞卖价", "成交的股票数",
-				"成交金额(元)", "买一", "买一", "买二", "买二", "买三", "买三", "买四", "买四", "买五", "买五", "卖一", "卖一", "卖二", "卖二", "卖三",
-				"卖三", "卖四", "卖四", "卖五", "卖五", "日期", "时间" };
+		String[] header = { "股票代码", "股票名字", "今日开盘价	", "昨日收盘价", "当前价格", "今日最高价",
+				"今日最低价", "竟买价", "竞卖价", "成交的股票数", "成交金额(元)", "买一", "买一", "买二",
+				"买二", "买三", "买三", "买四", "买四", "买五", "买五", "卖一", "卖一", "卖二",
+				"卖二", "卖三", "卖三", "卖四", "卖四", "卖五", "卖五", "日期", "时间" };
 		return header;
 	}
 
@@ -386,31 +381,31 @@ public class SinaStock {
 		Calendar start_calendar = Calendar.getInstance();
 		Thread sendMailThread;
 		Thread watchThread;
-//		long t1 = System.currentTimeMillis();
-//		File in = new File(db);		
-//		if (DEBUG_ALWAYS_CREATE_DB) {
-//			if (in.exists()) {
-//				in.delete();
-//			}
-//		}
-//		if (!in.exists()) {
-//			// 从网络获取
-//			if (codes.size() < 1)
-//				try {
-//					codes = getAllStackCodes();
-//				} catch (IOException e) {
-//					e.printStackTrace();
-//				}
-//		} else {
-//			// 从本地获取
-//			if (codes.size() < 1) {
-//				try {
-//					codes = getAllStockCodesFromLocal();
-//				} catch (IOException e) {
-//					e.printStackTrace();
-//				}
-//			}
-//		}
+		// long t1 = System.currentTimeMillis();
+		// File in = new File(db);
+		// if (DEBUG_ALWAYS_CREATE_DB) {
+		// if (in.exists()) {
+		// in.delete();
+		// }
+		// }
+		// if (!in.exists()) {
+		// // 从网络获取
+		// if (codes.size() < 1)
+		// try {
+		// codes = getAllStackCodes();
+		// } catch (IOException e) {
+		// e.printStackTrace();
+		// }
+		// } else {
+		// // 从本地获取
+		// if (codes.size() < 1) {
+		// try {
+		// codes = getAllStockCodesFromLocal();
+		// } catch (IOException e) {
+		// e.printStackTrace();
+		// }
+		// }
+		// }
 
 		codes.clear();
 		codes.add("sh601318");
@@ -424,7 +419,7 @@ public class SinaStock {
 		codes.add("sz300408");
 		codes.add("sz300003");
 		codes.add("sz300458");
-		
+
 		watchThread = new Thread(new WatchThread());
 		watchThread.start();
 
@@ -438,14 +433,14 @@ public class SinaStock {
 				Thread t = new Thread(new UpdateSocketThread(db, code));
 				t.start();
 				listThread.add(t);
-			}			
+			}
 
 			/* Check for the time */
 			while (true) {
 				Calendar cur_calendar = Calendar.getInstance();
-				if ((cur_calendar.get(Calendar.DAY_OF_MONTH) != 
-						start_calendar.get(Calendar.DAY_OF_MONTH)) ||
-						(WatchThread.bNeedQuit == true)) {
+				if ((cur_calendar.get(Calendar.DAY_OF_MONTH) != start_calendar
+						.get(Calendar.DAY_OF_MONTH))
+						|| (WatchThread.bNeedQuit == true)) {
 					UpdateSocketThread.bNeedQuit = true;
 					break;
 				}
@@ -454,7 +449,7 @@ public class SinaStock {
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				}				
+				}
 			}
 
 			for (Thread tmp : listThread) {
@@ -463,24 +458,25 @@ public class SinaStock {
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-					System.out.println("[Info] Get stock information interrupt");
+					Log.e("[Info] Get stock information interrupt");
 				}
 			}
 
 			db.closeDatabase();
-			
-			sendMailThread = new Thread(new SendEmail(db.subName, db.subName));
+
+			sendMailThread = new Thread(new SendEmail("Stock", db.subName,
+					db.subName));
 			sendMailThread.start();
 			try {
 				sendMailThread.join();
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-				System.out.println("[Info] Sending mail get an interrupt");
+				Log.e("[Info] Sending mail get an interrupt");
 			}
-			
-			if(WatchThread.bNeedQuit == true){
-				System.out.println("[Info] User quit finally");
+
+			if (WatchThread.bNeedQuit == true) {
+				Log.d("[Info] User quit finally");
 				break;
 			}
 		}

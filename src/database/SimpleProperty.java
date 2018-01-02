@@ -1,4 +1,4 @@
-package Database;
+package database;
 
 public class SimpleProperty {
 	public static final int TYPE_INT = 1;

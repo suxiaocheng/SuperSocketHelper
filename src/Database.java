@@ -1,13 +1,16 @@
 
+
+
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
-import Database.ItemInfo;
-import Database.SimplePropertyCollection;
+import database.ItemInfo;
+import database.SimplePropertyCollection;
+import debug.Log;
 
 public class Database {
 	private String databaseName;
@@ -33,7 +36,7 @@ public class Database {
 			e.printStackTrace();
 			System.exit(-2);
 		}
-		System.out.println("Database: " + databaseName + " load sucessfully!");
+		Log.d("Database: " + databaseName + " load sucessfully!");
 	}
 
 	void createTable(String table) {
@@ -43,10 +46,10 @@ public class Database {
 			stmt.executeUpdate(sql);
 		    stmt.close();
 		} catch (SQLException e) {
-			System.out.println("Statement operation error!");
+			Log.e("Statement operation error!");
 			e.printStackTrace();			
 		}
-		System.out.println("Table created successfully");
+		Log.d("Table created successfully");
 	}
 	
 	boolean insertTable(String statement){
@@ -57,7 +60,7 @@ public class Database {
 			stmt.executeUpdate(statement);
 		    stmt.close();
 		} catch (SQLException e) {
-			System.out.println("Execute statement: " + statement + " error!");
+			Log.e("Execute statement: " + statement + " error!");
 			e.printStackTrace();			
 		}
 		
@@ -73,7 +76,7 @@ public class Database {
 				System.out.print("Close database fail!");
 				e.printStackTrace();
 			}
-			System.out.println("Close database sucessfully!");
+			Log.d("Close database sucessfully!");
 		}
 	}
 }
