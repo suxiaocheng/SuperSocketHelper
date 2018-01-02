@@ -13,23 +13,20 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
-import tool.SendEmail;
+import app.GetAllStockCode.GetURLInfoThread;
+import config.Config;
 import database.Database;
 import debug.Log;
+import tool.SendEmail;
 
 /**
  * 
- * @author Don.W.Lee
+ * @author SuXiaocheng
  * @version 1.0
- * @since 2012-03-29
+ * @since 2018/01/02
  *
  */
 public class SinaStock {
-	private static String db = ".\\sina-stock-codes.txt";
-	private static final boolean DEBUG_ALWAYS_CREATE_DB = false;
-	private static final int CONNECTION_TIMEOUT = 30000;
-	private static final int CONNECTION_PARALLEL_EXEC = 64;
-
 	private static final String StockDetailFile = "stock_detail_file.csv";
 	private static final String StockSuspendedFile = "stock_suspended_file.csv";
 	private static List<String> codes = new ArrayList<String>();
@@ -38,191 +35,13 @@ public class SinaStock {
 
 	private Database stock_db;
 
-	/**
-	 * Check if the stock string is valid;
-	 * 
-	 * @param s
-	 *            string used to check;
-	 * @return true if string contain any alphabet or digit, otherwise false.
-	 */
-	static private boolean checkStockStringValid(String s) {
-		boolean bRet = false;
-
-		for (int i = 0; i < s.length(); i++) {
-			if (Character.isDigit(s.charAt(i))
-					|| Character.isAlphabetic(s.charAt(i))) {
-				bRet = true;
-				break;
-			}
-		}
-
-		return bRet;
-	}
-
-	private static List<String> handleStockCode(String code) {
-		List<String> outputList = null;
-		int end = code.indexOf(";");
-		int start;
-		if (end != -1) {
-			code = code.substring(0, end);
-			start = code.lastIndexOf("=");
-			if (start != -1) {
-				code = code.substring(start);
-				start = code.indexOf("\"");
-				end = code.lastIndexOf("\"");
-				if ((start != -1) && (end != -1)) {
-					code = code.substring(start + 1, end);
-					outputList = Arrays.asList(code.split(","));
-				}
-			}
-		}
-		return outputList;
-	}
-
-	/**
-	 * 
-	 * 
-	 * @param url
-	 *            URL need to handle;
-	 * @return all the stock code in the current page;
-	 * @throws IOException
-	 */
-	private static String getBatchStackCodes(URL url) throws IOException {
-		URLConnection connection = url.openConnection();
-		connection.setConnectTimeout(CONNECTION_TIMEOUT);
-		BufferedReader br = new BufferedReader(new InputStreamReader(
-				connection.getInputStream()));
-		String line = null;
-		StringBuffer sb = new StringBuffer();
-		boolean flag = false;
-		while ((line = br.readLine()) != null) {
-			if (line.contains("<script type=\"text/javascript\">") || flag) {
-				sb.append(line);
-				flag = true;
-			}
-			if (line.contains("</script>")) {
-				flag = false;
-				if (sb.length() > 0) {
-					if (sb.toString().contains("code_list")
-							&& sb.toString().contains("element_list")) {
-						break;
-					} else {
-						sb.setLength(0);
-					}
-				}
-			}
-		}
-		if (br != null) {
-			br.close();
-			br = null;
-		}
-		return sb.toString();
-	}
-
-	public static class GetURLInfoThread implements Runnable {
-		public URL assessURL;
-		public int count;
-
-		GetURLInfoThread(URL url, int i) {
-			super();
-			assessURL = url;
-			count = i;
-		}
-
-		public void run() {
-			String code = new String();
-			List<String> listTmp;
-			try {
-				Log.d("[Info]Execute " + count + ", URL: "
-						+ assessURL.toString());
-				code = getBatchStackCodes(assessURL);
-				listTmp = handleStockCode(code);
-				synchronized (codes) {
-					codes.addAll(listTmp);
-				}
-				Log.d("[Info]Execute " + count + " over.");
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				Log.e("[Error]Execute " + count);
-			}
-		}
-	}
-
-	private static List<String> getAllStackCodes() throws IOException {
-		List<Thread> listThread = new ArrayList<Thread>();
-		Thread updateDataThread;
-		int i;
-		URL url = null;
-		for (i = 1; i < 45; i++) {
-			url = new URL(
-					"http://vip.stock.finance.sina.com.cn/q/go.php/vIR_CustomSearch/index.phtml?p="
-							+ i);
-			updateDataThread = new Thread(new GetURLInfoThread(url, i));
-			// updateDataThread.run();
-			updateDataThread.start();
-
-			listThread.add(updateDataThread);
-		}
-
-		for (Thread iThread : listThread) {
-			try {
-				// 等待所有线程执行完毕
-				iThread.join();
-				// Log.d("Thread" + iThread.count + " is finish");
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-
-		if (!(new File(db)).exists())
-			saveStockCodes(codes);
-		return codes;
-	}
-
-	private static void saveStockCodes(List<String> codes) throws IOException {
-		File out = new File(db);
-		if (!out.exists())
-			out.createNewFile();
-		BufferedWriter bw = new BufferedWriter(new FileWriter(out));
-		for (String code : codes) {
-			bw.write(code);
-			bw.newLine();
-		}
-		if (bw != null) {
-			bw.close();
-			bw = null;
-		}
-	}
-
-	private static List<String> getAllStockCodesFromLocal() throws IOException {
-		List<String> codes = new ArrayList<String>();
-		File in = new File(db);
-		if (!in.exists())
-			throw new IOException("指定数据文件不存在!");
-		BufferedReader br = new BufferedReader(new FileReader(in));
-		String line = null;
-		while ((line = br.readLine()) != null) {
-			if (checkStockStringValid(line) == false) {
-				Log.e("[Warning]Invalid stock string: " + line + "\n");
-			} else {
-				codes.add(line);
-			}
-		}
-		if (br != null) {
-			br.close();
-			br = null;
-		}
-		return codes;
-	}
-
 	public static List<String> getStockInfoByCode(String stockCode)
 			throws IOException {
 		// 仅仅打印
 		List<String> stockList = new ArrayList<String>();
 		URL url = new URL("http://hq.sinajs.cn/?list=" + stockCode);
 		URLConnection connection = url.openConnection();
-		connection.setConnectTimeout(CONNECTION_TIMEOUT);
+		connection.setConnectTimeout(Config.CONNECTION_TIMEOUT);
 		BufferedReader br = new BufferedReader(new InputStreamReader(
 				connection.getInputStream()));
 		String line = null;
@@ -326,8 +145,8 @@ public class SinaStock {
 			listThread.add(t);
 
 			count++;
-			if ((count % CONNECTION_PARALLEL_EXEC) == 0) {
-				Log.d("[Info] Process [" + (count - CONNECTION_PARALLEL_EXEC)
+			if ((count % Config.CONNECTION_PARALLEL_EXEC) == 0) {
+				Log.d("[Info] Process [" + (count - Config.CONNECTION_PARALLEL_EXEC)
 						+ "~" + count + "] cluster");
 				for (Thread tmp : listThread) {
 					try {
@@ -383,8 +202,8 @@ public class SinaStock {
 		Thread sendMailThread;
 		Thread watchThread;
 		long t1 = System.currentTimeMillis();
-		File in = new File(db);
-		if (DEBUG_ALWAYS_CREATE_DB) {
+		File in = new File(Config.db);
+		if (Config.DEBUG_ALWAYS_CREATE_DB) {
 			if (in.exists()) {
 				in.delete();
 			}
@@ -392,20 +211,19 @@ public class SinaStock {
 		if (!in.exists()) {
 			if (codes.size() < 1)
 				try {
-					codes = getAllStackCodes();
+					codes = GetAllStockCode.getAllStockCodes();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 		} else {
 			if (codes.size() < 1) {
 				try {
-					codes = getAllStockCodesFromLocal();
+					codes = GetAllStockCode.getAllStockCodesFromLocal();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
 		}
-		
 		Log.d("Get code execute " + (System.currentTimeMillis()- t1) + " s");
 
 		codes.clear();

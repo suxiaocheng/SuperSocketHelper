@@ -21,3 +21,9 @@ bin/
 
 # ignore compress file
 *.xz
+
+
+# ignore log file
+*.log
+log/
+
