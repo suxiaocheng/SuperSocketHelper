@@ -134,7 +134,7 @@ public class SimplePropertyCollection {
 	}
 	
 	public static String getCreateTableStatement(SimpleProperty[] props, String tableName) {
-		String rtr = "CREATE TABLE " + tableName + " (";
+		String rtr = "CREATE TABLE IF NOT EXISTS " + tableName + " (";
 		for (int i = 0; i<props.length; i++) {
 			SimpleProperty p = props[i];
 			rtr += (i > 0 ? ", " : "") + p.getKey();

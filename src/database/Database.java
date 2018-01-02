@@ -1,3 +1,4 @@
+package database;
 
 
 
@@ -8,8 +9,6 @@ import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import database.ItemInfo;
-import database.SimplePropertyCollection;
 import debug.Log;
 
 public class Database {
@@ -28,18 +27,18 @@ public class Database {
 			Class.forName("org.sqlite.JDBC");
 			conn = (Connection) DriverManager.getConnection(databaseName);
 		} catch (SQLException e) {
-			System.out.println("Connection error!");
+			Log.e("Connection error!");
 			e.printStackTrace();
 			System.exit(-1);
 		} catch (ClassNotFoundException e) {
-			System.out.println("Class no found error!");
+			Log.e("Class no found error!");
 			e.printStackTrace();
 			System.exit(-2);
 		}
 		Log.d("Database: " + databaseName + " load sucessfully!");
 	}
 
-	void createTable(String table) {
+	public void createTable(String table) {
 		String sql = SimplePropertyCollection.getCreateTableStatement(ItemInfo.TEXT_DEFAULTS_ALL, table);
 		try {
 			Statement stmt = conn.createStatement();
@@ -52,7 +51,7 @@ public class Database {
 		Log.d("Table created successfully");
 	}
 	
-	boolean insertTable(String statement){
+	public boolean insertTable(String statement){
 		boolean status = true;
 		
 		try {
@@ -67,7 +66,7 @@ public class Database {
 		return status;
 	}
 
-	void closeDatabase() {
+	public void closeDatabase() {
 		if (conn != null) {
 			try {
 				conn.close();
