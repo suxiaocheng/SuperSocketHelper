@@ -1,23 +1,21 @@
 package app;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
-import app.GetAllStockCode.GetURLInfoThread;
+import tool.SendEmail;
 import config.Config;
 import database.Database;
 import debug.Log;
-import tool.SendEmail;
 
 /**
  * 
@@ -29,7 +27,7 @@ import tool.SendEmail;
 public class SinaStock {
 	private static final String StockDetailFile = "stock_detail_file.csv";
 	private static final String StockSuspendedFile = "stock_suspended_file.csv";
-	private static List<String> codes = new ArrayList<String>();
+	public static List<String> codes = new ArrayList<String>();
 	private static File stockDetailFile = null;
 	private static File stockSuspendedFile = null;
 
@@ -146,8 +144,9 @@ public class SinaStock {
 
 			count++;
 			if ((count % Config.CONNECTION_PARALLEL_EXEC) == 0) {
-				Log.d("[Info] Process [" + (count - Config.CONNECTION_PARALLEL_EXEC)
-						+ "~" + count + "] cluster");
+				Log.d("[Info] Process ["
+						+ (count - Config.CONNECTION_PARALLEL_EXEC) + "~"
+						+ count + "] cluster");
 				for (Thread tmp : listThread) {
 					try {
 						tmp.join();
@@ -201,6 +200,7 @@ public class SinaStock {
 		Calendar start_calendar = Calendar.getInstance();
 		Thread sendMailThread;
 		Thread watchThread;
+		Integer iNumberThread = 0;
 		long t1 = System.currentTimeMillis();
 		File in = new File(Config.db);
 		if (Config.DEBUG_ALWAYS_CREATE_DB) {
@@ -224,20 +224,7 @@ public class SinaStock {
 				}
 			}
 		}
-		Log.d("Get code execute " + (System.currentTimeMillis()- t1) + " s");
-
-		codes.clear();
-		codes.add("sh601318");
-		codes.add("sz000826");
-		codes.add("sz002415");
-		codes.add("sh600036");
-		codes.add("sz002271");
-		codes.add("sz000333");
-		codes.add("sh601717");
-		codes.add("sh601169");
-		codes.add("sz300408");
-		codes.add("sz300003");
-		codes.add("sz300458");
+		Log.d("Get code execute " + (System.currentTimeMillis() - t1) + " s");
 
 		watchThread = new Thread(new WatchThread());
 		watchThread.start();
@@ -247,12 +234,18 @@ public class SinaStock {
 			start_calendar = Calendar.getInstance();
 			Database db = new Database("stock");
 			List<Thread> listThread = new ArrayList<>();
+			iNumberThread = 0;
 
 			for (String code : codes) {
 				Thread t = new Thread(new UpdateSocketThread(db, code));
-				t.start();
 				listThread.add(t);
 			}
+			
+			for(Thread t: listThread){
+				t.start();
+				iNumberThread++;
+			}
+			Log.d(iNumberThread + " is create and running in background");
 
 			/* Check for the time */
 			while (true) {
@@ -273,6 +266,7 @@ public class SinaStock {
 
 			for (Thread tmp : listThread) {
 				try {
+					tmp.interrupt();
 					tmp.join();
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
@@ -280,11 +274,16 @@ public class SinaStock {
 					Log.e("[Info] Get stock information interrupt");
 				}
 			}
+			
+			if(UpdateSocketThread.iNumberThread != 0) {
+				Log.e("Thread static data error: " + UpdateSocketThread.iNumberThread);
+			}
 
 			db.closeDatabase();
 
-			sendMailThread = new Thread(new SendEmail("Stock", db.subName,
-					db.subName));
+			sendMailThread = new Thread(new SendEmail("Stock",
+					db.strDatabaseName + "-" +  db.strDate,
+					Database.compressDB(db.strRawDatabaseName)));
 			sendMailThread.start();
 			try {
 				sendMailThread.join();

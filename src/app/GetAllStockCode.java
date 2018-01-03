@@ -166,7 +166,7 @@ public class GetAllStockCode {
 		return codes;
 	}
 
-	private static void saveStockCodes(List<String> codes) throws IOException {
+	public static void saveStockCodes(List<String> codes) throws IOException {
 		File out = new File(Config.db);
 		if (!out.exists())
 			out.createNewFile();

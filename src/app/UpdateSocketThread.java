@@ -5,9 +5,14 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import config.Config;
 import database.Database;
 import database.ItemInfo;
 import debug.Log;
@@ -21,11 +26,55 @@ public class UpdateSocketThread implements Runnable {
 	String stock;
 	int count = 0;
 	int updateCount = 0;
+	private static final String strValidTime[] = { "9:00:00", "11:30:00",
+			"13:00:00", "15:00:00" };
+	public static Integer iNumberThread = 0;
 
 	UpdateSocketThread(Database _db, String _stock) {
 		super();
 		db = _db;
 		stock = _stock;
+	}
+
+	public static int diffTime(String time1, String time2) {
+		DateFormat df = new SimpleDateFormat("HH:mm:ss");
+		long diff;
+
+		try {
+			diff = df.parse(time1).getTime() - df.parse(time2).getTime();
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			diff = 0;
+		}
+
+		return (int) (diff / 1000);
+	}
+
+	public static int checkTimeIntervalValid(String strTime) {
+		int ret = 0;
+		int tmp;
+
+		ret = diffTime(strValidTime[0], strTime);
+		if (ret < 0) {
+			ret = diffTime(strValidTime[1], strTime);
+			if (ret > 0) {
+				return 0;
+			} else {
+				ret = diffTime(strValidTime[2], strTime);
+				if (ret < 0) {
+					ret = diffTime(strValidTime[3], strTime);
+					if (ret > 0) {
+						return 0;
+					} else {
+						ret = diffTime(strValidTime[0], strTime);
+						ret += 24 * 60 * 60;
+					}
+				}
+			}
+		}
+
+		return ret;
 	}
 
 	public static List<String> getStockInfoByCode(String stockCode)
@@ -60,7 +109,7 @@ public class UpdateSocketThread implements Runnable {
 		String sql;
 		ItemInfo item;
 		ItemInfo oldItem = null;
-		boolean needAddToDb = false;
+		boolean bNeedAddToDb = false;
 		String code;
 		String name;
 		double price_start;
@@ -77,12 +126,118 @@ public class UpdateSocketThread implements Runnable {
 		double[] price_seller = new double[5];
 		int[] num_seller = new int[5];
 		String date, time;
+		DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+		DateFormat dateFormatTable = new SimpleDateFormat("yyyy-MM-dd");
+		Date dateCurrent = new Date();
+		int iFailTimes = 0;
 
-		db.createTable(stock);
-		while (true) {
-			if ((count % 100) == 0) {
-				Log.d("Thread " + stock + " " + count);
+		synchronized (iNumberThread) {
+			iNumberThread++;
+		}
+
+		/* Check if connection data valid */
+		try {
+			listTmp = getStockInfoByCode(stock);
+			listTmp.get(31);
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+			Log.e("IOException: Connection " + stock + " is invalid");
+			synchronized (iNumberThread) {
+				if (iNumberThread > 0) {
+					iNumberThread--;
+				} else {
+					Log.e("Thread number error");
+				}
 			}
+			return;
+		} catch (IndexOutOfBoundsException e1) {
+			Log.e("IndexOutOfBoundsException: Connection " + stock
+					+ " is invalid");
+			synchronized (SinaStock.codes) {
+				boolean status = SinaStock.codes.remove(stock);
+				if (status == true) {
+					Log.d("Remove " + stock + " ok");
+				} else {
+					Log.d("Remove " + stock + " fail");
+				}
+				try {
+					GetAllStockCode.saveStockCodes(SinaStock.codes);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			synchronized (iNumberThread) {
+				if (iNumberThread > 0) {
+					iNumberThread--;
+				} else {
+					Log.e("Thread number error");
+				}
+			}
+			return;
+		}
+
+		while (true) {
+			dateCurrent = new Date();
+			String strDate = dateFormat.format(dateCurrent);
+			int iNeedWaitTime = checkTimeIntervalValid(strDate);
+			int iNeedSleepTime;
+			if (iNeedWaitTime >= 60) {
+				// Log.d("Thread " + stock + " is going to sleep");
+				iNeedSleepTime = 60000;
+			} else {
+				break;
+			}
+			try {
+				Thread.sleep(iNeedSleepTime);
+			} catch (InterruptedException e) {
+				// e.printStackTrace();
+			}
+			if (bNeedQuit == true) {
+				Log.d("User quit at wait state");
+				synchronized (iNumberThread) {
+					if (iNumberThread > 0) {
+						iNumberThread--;
+					} else {
+						Log.e("Thread number error");
+					}
+				}
+				return;
+			}
+			if (iNeedWaitTime != 0) {
+				continue;
+			}
+		}
+
+		db.createTable(stock + ":" + dateFormatTable.format(dateCurrent));
+		while (true) {
+			dateCurrent = new Date();
+			String strDate = dateFormat.format(dateCurrent);
+			int iNeedWaitTime = checkTimeIntervalValid(strDate);
+			int iNeedSleepTime;
+			if (iNeedWaitTime >= 60) {
+				iNeedSleepTime = 60000;
+			} else {
+				iNeedSleepTime = 1000;
+			}
+			try {
+				Thread.sleep(iNeedSleepTime);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			if (bNeedQuit == true) {
+				Log.d("User quit");
+				break;
+			}
+			if (iNeedWaitTime != 0) {
+				continue;
+			}
+
+			if ((count % 100) == 0) {
+				Log.d("->" + stock + " is: " + count);
+			}
+
 			count++;
 			try {
 				listTmp = getStockInfoByCode(stock);
@@ -111,31 +266,27 @@ public class UpdateSocketThread implements Runnable {
 				date = listTmp.get(30);
 				time = listTmp.get(31);
 
+				dateCurrent = new Date();
+				String time_actual = dateFormat.format(dateCurrent);
+
 				item = new ItemInfo(code, name, price_start, price_last_end,
 						price_current, price_today_high, price_today_low,
 						price_compete_buy, price_compete_seller,
 						price_num_deal, price_deal, price_buy, num_buy,
-						price_seller, num_seller, date, time);
+						price_seller, num_seller, date, time, time_actual);
 
-				needAddToDb = true;
+				bNeedAddToDb = true;
 				if ((oldItem != null) && item.compareItem(oldItem)) {
-					needAddToDb = false;
+					bNeedAddToDb = false;
 				}
 				oldItem = item;
-				if (needAddToDb) {
+				if (bNeedAddToDb) {
 					sql = "INSERT INTO " + stock + " " + item.getTitle()
 							+ "VALUES " + item.getValue() + ";";
 					db.insertTable(sql);
 					updateCount++;
 				}
-
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-
+				iFailTimes = 0;
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -143,14 +294,19 @@ public class UpdateSocketThread implements Runnable {
 			} catch (IndexOutOfBoundsException e) {
 				e.printStackTrace();
 				Log.e("Out of bound");
-				break;
-			}
-			if (bNeedQuit == true) {
-				Log.d("User quit");
-				break;
+				if (++iFailTimes > Config.MAX_FAIL_TIMES_ALLOW) {
+					break;
+				}
 			}
 		}
 		Log.d("Execute " + stock + " count: " + count + ", Times: "
 				+ updateCount);
+		synchronized (iNumberThread) {
+			if (iNumberThread > 0) {
+				iNumberThread--;
+			} else {
+				Log.e("Thread number error");
+			}
+		}
 	}
 }

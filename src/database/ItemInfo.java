@@ -22,7 +22,7 @@ public class ItemInfo extends SimplePropertyCollection {
     		double price_num_deal, double price_deal, 
     		double[] price_buy, int[] num_buy,     		
     		double[] price_seller, int[] num_seller,
-    		String date, String time){
+    		String date, String time, String time_actual){
     	super(TEXT_DEFAULTS_ALL);
     	set(ROW_ID, System.currentTimeMillis());
     	set(ROW_CODE, code);
@@ -59,6 +59,7 @@ public class ItemInfo extends SimplePropertyCollection {
     	
     	set(ROW_DATE, date);
     	set(ROW_TIME, time);
+    	set(ROW_TIME_ACTUAL, time_actual);
     }
 
     /* Used for sql */
@@ -101,6 +102,7 @@ public class ItemInfo extends SimplePropertyCollection {
     
     public static final String ROW_DATE = "DATE";
     public static final String ROW_TIME = "TIME";
+    public static final String ROW_TIME_ACTUAL = "TIME_ACTUAL";
     
     public static final String[] titleList = {ROW_ID, ROW_CODE, ROW_NAME, ROW_PRICE_START,
 			ROW_PRICE_LAST_END, ROW_PRICE_CURRENT, ROW_PRICE_TODAY_HIGH, 
@@ -110,7 +112,7 @@ public class ItemInfo extends SimplePropertyCollection {
 			ROW_PRICE_BUY4, ROW_NUM_BUY4, ROW_PRICE_BUY5, ROW_NUM_BUY5,
 			ROW_PRICE_SELLER1, ROW_NUM_SELLER1, ROW_PRICE_SELLER2, ROW_NUM_SELLER2, 
 			ROW_PRICE_SELLER3, ROW_NUM_SELLER3, ROW_PRICE_SELLER4, ROW_NUM_SELLER4, 
-			ROW_PRICE_SELLER5, ROW_NUM_SELLER5, ROW_DATE, ROW_TIME};
+			ROW_PRICE_SELLER5, ROW_NUM_SELLER5, ROW_DATE, ROW_TIME, ROW_TIME_ACTUAL};
     
     public static final String[] compareList = {ROW_CODE, ROW_NAME, ROW_PRICE_START,
 			ROW_PRICE_LAST_END, ROW_PRICE_CURRENT, ROW_PRICE_TODAY_HIGH, 
@@ -160,7 +162,8 @@ public class ItemInfo extends SimplePropertyCollection {
             new SimpleProperty(ROW_NUM_SELLER4, 0),
             new SimpleProperty(ROW_NUM_SELLER5, 0),
             new SimpleProperty(ROW_DATE, ""),
-            new SimpleProperty(ROW_TIME, "")
+            new SimpleProperty(ROW_TIME, ""),
+            new SimpleProperty(ROW_TIME_ACTUAL, "")
     };
     
     public String getValue() {

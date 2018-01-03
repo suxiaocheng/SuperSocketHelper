@@ -1,31 +1,40 @@
 package database;
 
-
-
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import org.tukaani.xz.LZMA2Options;
+import org.tukaani.xz.XZOutputStream;
 
 import debug.Log;
 
 public class Database {
-	private String databaseName;
-	public String subName;
+	public String strDatabaseName;
 	private Connection conn = null;
+	public String strDate;
+	public String strRawDatabaseName;
 
 	public Database(String name) {
-		Date currentTime = new Date(System.currentTimeMillis());
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd");
-		String dateString = formatter.format(currentTime);
-
-		subName = name + dateString + ".db";
-		databaseName = "jdbc:sqlite:" + name + dateString + ".db";
+		DateFormat dateFormatTable = new SimpleDateFormat("yyyy-MM-dd");
+		Date dateCurrent = new Date();
+		strDate = dateFormatTable.format(dateCurrent);
+		
+		strRawDatabaseName= name + ".db";
+		strDatabaseName = "jdbc:sqlite:" + name + ".db";
 		try {
 			Class.forName("org.sqlite.JDBC");
-			conn = (Connection) DriverManager.getConnection(databaseName);
+			conn = (Connection) DriverManager.getConnection(strDatabaseName);
 		} catch (SQLException e) {
 			Log.e("Connection error!");
 			e.printStackTrace();
@@ -35,34 +44,39 @@ public class Database {
 			e.printStackTrace();
 			System.exit(-2);
 		}
-		Log.d("Database: " + databaseName + " load sucessfully!");
+		Log.d("Database: " + strDatabaseName + " load sucessfully!");
 	}
 
 	public void createTable(String table) {
-		String sql = SimplePropertyCollection.getCreateTableStatement(ItemInfo.TEXT_DEFAULTS_ALL, table);
+		DateFormat dateFormatTable = new SimpleDateFormat("yyyy-MM-dd");
+		Date dateCurrent = new Date();
+		strDate = dateFormatTable.format(dateCurrent);
+
+		String sql = SimplePropertyCollection.getCreateTableStatement(
+				ItemInfo.TEXT_DEFAULTS_ALL, table + strDate);
 		try {
 			Statement stmt = conn.createStatement();
 			stmt.executeUpdate(sql);
-		    stmt.close();
+			stmt.close();
 		} catch (SQLException e) {
 			Log.e("Statement operation error!");
-			e.printStackTrace();			
+			e.printStackTrace();
 		}
 		Log.d("Table created successfully");
 	}
-	
-	public boolean insertTable(String statement){
+
+	public boolean insertTable(String statement) {
 		boolean status = true;
-		
+
 		try {
 			Statement stmt = conn.createStatement();
 			stmt.executeUpdate(statement);
-		    stmt.close();
+			stmt.close();
 		} catch (SQLException e) {
 			Log.e("Execute statement: " + statement + " error!");
-			e.printStackTrace();			
+			e.printStackTrace();
 		}
-		
+
 		return status;
 	}
 
@@ -77,5 +91,60 @@ public class Database {
 			}
 			Log.d("Close database sucessfully!");
 		}
+	}
+
+	public static String compressDB(String strDBName) {
+		LZMA2Options options = new LZMA2Options();
+		FileOutputStream outfile;
+		String strDBXZName;
+		long time_start = System.currentTimeMillis();
+
+		Log.d("Encoder memory usage: " + options.getEncoderMemoryUsage()
+				+ " KiB");
+		Log.d("Decoder memory usage: " + options.getDecoderMemoryUsage()
+				+ " KiB");
+
+		strDBXZName = strDBName + ".xz";
+		Log.d("Origin file: " + strDBName + ", compress file: " + strDBXZName);
+		try {
+			File fDBOut = new File(strDBXZName);
+			File fDBIn = new File(strDBName);
+			if (fDBOut.exists() == true) {
+				fDBOut.delete();
+			}
+			outfile = new FileOutputStream(strDBXZName);
+			XZOutputStream out = new XZOutputStream(outfile, options);
+			InputStream in = new FileInputStream(fDBIn);
+
+			byte[] buf = new byte[8192];
+			int size;
+			while ((size = in.read(buf, 0, buf.length)) != -1)
+				out.write(buf, 0, size);
+			out.finish();
+			out.close();
+			in.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			outfile = null;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			outfile = null;
+		}
+
+		if (outfile == null) {
+			return strDBName;
+		}
+		long time_end = System.currentTimeMillis();
+		float sec = ((float) (time_end - time_start) / 1000);
+
+		Log.d("Compress used " + sec + " s");
+
+		return strDBXZName;
+	}
+
+	public static void main(String[] args) {
+		compressDB("sina-stock-codes.txt");
 	}
 }
