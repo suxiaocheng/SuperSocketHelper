@@ -127,10 +127,10 @@ public class UpdateSocketThread implements Runnable {
 		int[] num_seller = new int[5];
 		String date, time;
 		DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
-		DateFormat dateFormatTable = new SimpleDateFormat("yyyy-MM-dd");
+		DateFormat dateFormatTable = new SimpleDateFormat("yyyyMMdd");
 		Date dateCurrent = new Date();
 		int iFailTimes = 0;
-
+		
 		synchronized (iNumberThread) {
 			iNumberThread++;
 		}
@@ -210,7 +210,7 @@ public class UpdateSocketThread implements Runnable {
 			}
 		}
 
-		db.createTable(stock + ":" + dateFormatTable.format(dateCurrent));
+		db.createTable(stock + "_" + dateFormatTable.format(dateCurrent));
 		while (true) {
 			dateCurrent = new Date();
 			String strDate = dateFormat.format(dateCurrent);
@@ -281,7 +281,7 @@ public class UpdateSocketThread implements Runnable {
 				}
 				oldItem = item;
 				if (bNeedAddToDb) {
-					sql = "INSERT INTO " + stock + " " + item.getTitle()
+					sql = "INSERT INTO " + stock + "_" + dateFormatTable.format(dateCurrent) + " " + item.getTitle()
 							+ "VALUES " + item.getValue() + ";";
 					db.insertTable(sql);
 					updateCount++;

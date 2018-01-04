@@ -48,12 +48,8 @@ public class Database {
 	}
 
 	public void createTable(String table) {
-		DateFormat dateFormatTable = new SimpleDateFormat("yyyy-MM-dd");
-		Date dateCurrent = new Date();
-		strDate = dateFormatTable.format(dateCurrent);
-
 		String sql = SimplePropertyCollection.getCreateTableStatement(
-				ItemInfo.TEXT_DEFAULTS_ALL, table + strDate);
+				ItemInfo.TEXT_DEFAULTS_ALL, table);
 		try {
 			Statement stmt = conn.createStatement();
 			stmt.executeUpdate(sql);

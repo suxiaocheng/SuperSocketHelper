@@ -244,6 +244,11 @@ public class SinaStock {
 			for(Thread t: listThread){
 				t.start();
 				iNumberThread++;
+				if(Config.MAX_EXECUTE_THREAD != -1){
+					if(iNumberThread >= Config.MAX_EXECUTE_THREAD){
+						break;
+					}
+				}
 			}
 			Log.d(iNumberThread + " is create and running in background");
 
