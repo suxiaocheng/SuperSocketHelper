@@ -202,7 +202,7 @@ public class SinaStock {
 		Thread watchThread;
 		Integer iNumberThread = 0;
 		long t1 = System.currentTimeMillis();
-		File in = new File(Config.db);
+		File in = new File(Config.FILE_STORAGE_PATH + Config.db);
 		if (Config.DEBUG_ALWAYS_CREATE_DB) {
 			if (in.exists()) {
 				in.delete();

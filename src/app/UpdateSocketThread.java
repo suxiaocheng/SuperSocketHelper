@@ -140,6 +140,7 @@ public class UpdateSocketThread implements Runnable {
 		Calendar cur_calendar = Calendar.getInstance();
 		if ((cur_calendar.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) ||
 				(cur_calendar.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY)){
+			Log.d("Today is free");
 			return;
 		}
 

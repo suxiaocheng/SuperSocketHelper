@@ -161,13 +161,13 @@ public class GetAllStockCode {
 			}
 		}
 
-		if (!(new File(Config.db)).exists())
+		if (!(new File(Config.FILE_STORAGE_PATH + Config.db)).exists())
 			saveStockCodes(codes);
 		return codes;
 	}
 
 	public static void saveStockCodes(List<String> codes) throws IOException {
-		File out = new File(Config.db);
+		File out = new File(Config.FILE_STORAGE_PATH + Config.db);
 		if (!out.exists())
 			out.createNewFile();
 		BufferedWriter bw = new BufferedWriter(new FileWriter(out));
@@ -183,9 +183,9 @@ public class GetAllStockCode {
 
 	public static List<String> getAllStockCodesFromLocal() throws IOException {
 		List<String> file_store_codes = new ArrayList<String>();
-		File in = new File(Config.db);
+		File in = new File(Config.FILE_STORAGE_PATH + Config.db);
 		if (!in.exists()) {
-			Log.e("The data file [" + Config.db + " ] is not exist");
+			Log.e("The data file [" + Config.FILE_STORAGE_PATH + Config.db + " ] is not exist");
 			throw new IOException("The data file [" + Config.db + " ] is not exist");
 		}
 		BufferedReader br = new BufferedReader(new FileReader(in));

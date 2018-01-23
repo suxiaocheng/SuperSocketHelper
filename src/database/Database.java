@@ -17,6 +17,7 @@ import java.util.Date;
 import org.tukaani.xz.LZMA2Options;
 import org.tukaani.xz.XZOutputStream;
 
+import config.Config;
 import debug.Log;
 
 public class Database {
@@ -29,9 +30,9 @@ public class Database {
 		DateFormat dateFormatTable = new SimpleDateFormat("yyyy-MM-dd");
 		Date dateCurrent = new Date();
 		strDate = dateFormatTable.format(dateCurrent);
-		
-		strRawDatabaseName= name + ".db";
-		strDatabaseName = "jdbc:sqlite:" + name + ".db";
+
+		strRawDatabaseName = name + ".db";
+		strDatabaseName = "jdbc:sqlite:" + Config.FILE_STORAGE_PATH + name + ".db";
 		try {
 			Class.forName("org.sqlite.JDBC");
 			conn = (Connection) DriverManager.getConnection(strDatabaseName);
@@ -48,8 +49,7 @@ public class Database {
 	}
 
 	public void createTable(String table) {
-		String sql = SimplePropertyCollection.getCreateTableStatement(
-				ItemInfo.TEXT_DEFAULTS_ALL, table);
+		String sql = SimplePropertyCollection.getCreateTableStatement(ItemInfo.TEXT_DEFAULTS_ALL, table);
 		try {
 			Statement stmt = conn.createStatement();
 			stmt.executeUpdate(sql);
@@ -95,16 +95,14 @@ public class Database {
 		String strDBXZName;
 		long time_start = System.currentTimeMillis();
 
-		Log.d("Encoder memory usage: " + options.getEncoderMemoryUsage()
-				+ " KiB");
-		Log.d("Decoder memory usage: " + options.getDecoderMemoryUsage()
-				+ " KiB");
+		Log.d("Encoder memory usage: " + options.getEncoderMemoryUsage() + " KiB");
+		Log.d("Decoder memory usage: " + options.getDecoderMemoryUsage() + " KiB");
 
 		strDBXZName = strDBName + ".xz";
 		Log.d("Origin file: " + strDBName + ", compress file: " + strDBXZName);
 		try {
-			File fDBOut = new File(strDBXZName);
-			File fDBIn = new File(strDBName);
+			File fDBOut = new File(Config.FILE_STORAGE_PATH + strDBXZName);
+			File fDBIn = new File(Config.FILE_STORAGE_PATH + strDBName);
 			if (fDBOut.exists() == true) {
 				fDBOut.delete();
 			}
@@ -130,14 +128,14 @@ public class Database {
 		}
 
 		if (outfile == null) {
-			return strDBName;
+			return Config.FILE_STORAGE_PATH + strDBName;
 		}
 		long time_end = System.currentTimeMillis();
 		float sec = ((float) (time_end - time_start) / 1000);
 
 		Log.d("Compress used " + sec + " s");
 
-		return strDBXZName;
+		return Config.FILE_STORAGE_PATH + strDBXZName;
 	}
 
 	public static void main(String[] args) {

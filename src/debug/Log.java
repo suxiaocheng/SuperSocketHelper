@@ -7,8 +7,10 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import config.Config;
+
 public class Log {
-	private static final String strLogDir = "." + File.separator + "log";
+	private static final String strLogDir = Config.FILE_STORAGE_PATH + "log";
 	private static final String strLogName = "log";
 	private static File fLogFile;
 	private static File fLogDir;
