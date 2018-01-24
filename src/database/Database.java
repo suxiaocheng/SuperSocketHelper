@@ -106,7 +106,7 @@ public class Database {
 			if (fDBOut.exists() == true) {
 				fDBOut.delete();
 			}
-			outfile = new FileOutputStream(strDBXZName);
+			outfile = new FileOutputStream(Config.FILE_STORAGE_PATH + strDBXZName);
 			XZOutputStream out = new XZOutputStream(outfile, options);
 			InputStream in = new FileInputStream(fDBIn);
 
