@@ -6,10 +6,6 @@
 	<classpathentry kind="lib" path="lib/jsoup-1.11.2-javadoc.jar"/>
 	<classpathentry kind="lib" path="lib/jsoup-1.11.2.jar"/>
 	<classpathentry kind="lib" path="lib/xz.jar"/>
-	<classpathentry kind="lib" path="lib/javax.mail-1.4.5.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="file:/D:/uidq0655/Downloads/javamail-1.4.5/docs/javadocs/"/>
-		</attributes>
-	</classpathentry>
+	<classpathentry kind="lib" path="lib/javax.mail-1.4.5.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
