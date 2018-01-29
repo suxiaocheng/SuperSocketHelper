@@ -267,6 +267,10 @@ public class SinaStock {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				if (UpdateSocketThread.iNumberThread == 0){
+					Log.d("All thread has been quit");
+					break;
+				}
 			}
 
 			for (Thread tmp : listThread) {

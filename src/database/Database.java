@@ -27,12 +27,12 @@ public class Database {
 	public String strRawDatabaseName;
 
 	public Database(String name) {
-		DateFormat dateFormatTable = new SimpleDateFormat("yyyy-MM-dd");
+		DateFormat dateFormatTable = new SimpleDateFormat("-yyyy-MM-dd");
 		Date dateCurrent = new Date();
 		strDate = dateFormatTable.format(dateCurrent);
 
-		strRawDatabaseName = name + ".db";
-		strDatabaseName = "jdbc:sqlite:" + Config.FILE_STORAGE_PATH + name + ".db";
+		strRawDatabaseName = name + dateFormatTable + ".db";
+		strDatabaseName = "jdbc:sqlite:" + Config.FILE_STORAGE_PATH + name + dateFormatTable + ".db";
 		try {
 			Class.forName("org.sqlite.JDBC");
 			conn = (Connection) DriverManager.getConnection(strDatabaseName);
@@ -117,6 +117,9 @@ public class Database {
 			out.finish();
 			out.close();
 			in.close();
+			
+			/* If compress sucessfully, delete the uncompress file */
+			fDBIn.delete();
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

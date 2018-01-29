@@ -230,6 +230,10 @@ public class UpdateSocketThread implements Runnable {
 			} else {
 				iNeedSleepTime = 1000;
 			}
+			if (iNeedWaitTime > 9 * 60 *60){
+				Log.d(stock + "Need to wait more than 9 hours, so quit");
+				break;
+			}
 			try {
 				Thread.sleep(iNeedSleepTime);
 			} catch (InterruptedException e) {
