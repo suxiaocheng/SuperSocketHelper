@@ -31,8 +31,8 @@ public class Database {
 		Date dateCurrent = new Date();
 		strDate = dateFormatTable.format(dateCurrent);
 
-		strRawDatabaseName = name + dateFormatTable + ".db";
-		strDatabaseName = "jdbc:sqlite:" + Config.FILE_STORAGE_PATH + name + dateFormatTable + ".db";
+		strRawDatabaseName = name + strDate + ".db";
+		strDatabaseName = "jdbc:sqlite:" + Config.FILE_STORAGE_PATH + name + strDate + ".db";
 		try {
 			Class.forName("org.sqlite.JDBC");
 			conn = (Connection) DriverManager.getConnection(strDatabaseName);
