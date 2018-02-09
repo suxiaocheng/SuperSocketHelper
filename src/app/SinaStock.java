@@ -12,10 +12,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import tool.SendEmail;
 import config.Config;
 import database.Database;
 import debug.Log;
+import tool.SendEmail;
+import tool.SyncTime;
 
 /**
  * 
@@ -201,6 +202,28 @@ public class SinaStock {
 		Thread sendMailThread;
 		Thread watchThread;
 		Integer iNumberThread = 0;
+		
+		/* sync time first */
+		boolean bStatus;
+		while (true) {
+			bStatus = SyncTime.isConnect();
+			if (bStatus == true) {
+				break;
+			}
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		bStatus = SyncTime.waitNetworkTimeSync();
+		if(bStatus == false) {
+			return;
+		}
+		System.out.println("Sync time sucessfully");
+		
 		long t1 = System.currentTimeMillis();
 		File in = new File(Config.FILE_STORAGE_PATH + Config.db);
 		if (Config.DEBUG_ALWAYS_CREATE_DB) {
