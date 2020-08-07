@@ -153,7 +153,7 @@ public class GetAllStockCode {
 
 		for (Thread iThread : listThread) {
 			try {
-				// µÈ´ýËùÓÐÏß³ÌÖ´ÐÐÍê±Ï
+				// ç­‰å¾…æ‰€æœ‰çº¿ç¨‹æ‰§è¡Œå®Œæ¯•
 				iThread.join();
 				// Log.d("Thread" + iThread.count + " is finish");
 			} catch (InterruptedException e) {
