@@ -9,6 +9,6 @@ public class Config {
 	public static final int MAX_FAIL_TIMES_ALLOW = 16;
 	public static String db = "sina-stock-codes.txt";
 	public static final int MAX_EXECUTE_THREAD = 64;
-	public static final String FILE_STORAGE_PATH = File.separator + "home" + File.separator + "pi" + File.separator
+	public static final String FILE_STORAGE_PATH = System.getProperty("user.home") + File.separator
 			+ "stock" + File.separator;;
 }
